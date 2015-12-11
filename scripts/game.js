@@ -9,32 +9,43 @@ var bulletBmp;
 var asteroidBmp;
 
 var gameOver = false;
+var gameStarted = false;
 
 var score = 0;
 
 function draw()
-{    
-	if(!gameOver){
-		//draw_sprite(canvas, ship.bmp, ship.x, ship.y);
-		bullets.forEach(function (value){
-			draw_sprite(canvas, value.bmp, value.x, value.y);
-		});
-		asteroids.forEach(function (value){
-			scaled_sprite(canvas, value.bmp, value.x, value.y, value.scale, value.scale);
-		});
-		rotate_sprite(canvas,ship.enginesOn?ship.bmpEng:ship.bmp,ship.x,ship.y,DEG(Math.atan2(mouse_y-ship.y,mouse_x-ship.x)));
-		textout_centre(canvas,font,"SCORE: "+score,SCREEN_W/2,15,14,makecol(255,255,255));
-	} else {
-		textout_centre(canvas,font,"GAME OVER",SCREEN_W/2,SCREEN_H/2,24,makecol(255,255,255));
-		textout_centre(canvas,font,"press SPACE to restart",SCREEN_W/2,SCREEN_H/2+50,14,makecol(255,255,255));
-	} 
+{   
+	if(!gameStarted)
+	{
+		textout_centre(canvas,font,"ASTEROIDS",SCREEN_W/2,SCREEN_H/2-50,24,makecol(255,255,255));
+		textout_centre(canvas,font,"LPM - shoot"+ score,SCREEN_W/2,SCREEN_H/2,14,makecol(255,255,255));
+		textout_centre(canvas,font,"MOUSE - aim",SCREEN_W/2,SCREEN_H/2+20,14,makecol(255,255,255));
+		textout_centre(canvas,font,"SPACE - move",SCREEN_W/2,SCREEN_H/2 +40,14,makecol(255,255,255));
+		textout_centre(canvas,font,"Press SPACE to start",SCREEN_W/2,SCREEN_H/2 +80,14,makecol(255,255,255));
+		
+	}else{
+		if(!gameOver){
+			//draw_sprite(canvas, ship.bmp, ship.x, ship.y);
+			bullets.forEach(function (value){
+				draw_sprite(canvas, value.bmp, value.x, value.y);
+			});
+			asteroids.forEach(function (value){
+				scaled_sprite(canvas, value.bmp, value.x, value.y, value.scale, value.scale);
+			});
+			rotate_sprite(canvas,ship.enginesOn?ship.bmpEng:ship.bmp,ship.x,ship.y,DEG(Math.atan2(mouse_y-ship.y,mouse_x-ship.x)));
+			textout_centre(canvas,font,"SCORE: "+score,SCREEN_W/2,15,14,makecol(255,255,255));
+		} else {
+			textout_centre(canvas,font,"GAME OVER",SCREEN_W/2,SCREEN_H/2,24,makecol(255,255,255));
+			textout_centre(canvas,font,"Your SCORE is: "+ score,SCREEN_W/2,SCREEN_H/2+50,14,makecol(255,255,255));
+			textout_centre(canvas,font,"press SPACE to restart",SCREEN_W/2,SCREEN_H/2+80,14,makecol(255,255,255));
+		}
+	}	
 }
 
 function update()
 {	
-	if(!gameOver){
+	if(!gameOver && gameStarted){
 	
-
 		if(ship.enginesOn){
 			ship.v = (ship.v <= 2 )?(ship.v + 0.02):(2);
 		}else{
@@ -103,7 +114,7 @@ function update()
 
 function controls ()
 {
-	if(!gameOver){
+	if(!gameOver && gameStarted){
 		if(pressed[KEY_SPACE]){
 			ship.enginesOn = true;
 		}
@@ -123,17 +134,19 @@ function controls ()
 			});
 		} 
 	}else{
-		if(pressed[KEY_SPACE]){
+		if(pressed[KEY_SPACE] && gameStarted){
 			load_elements();
 			score = 0;
 			gameOver = false;
+		}else if(pressed[KEY_SPACE]){
+			gameStarted = true;
 		}
 	}
 }
 
 function events()
 {
-	if(!gameOver) {
+	if(!gameOver && gameStarted) {
 		if(Math.random() >= 0.99){
 			asteroids.add({
 				bmp: asteroidBmp,
