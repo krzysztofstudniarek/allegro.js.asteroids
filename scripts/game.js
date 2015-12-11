@@ -18,16 +18,20 @@ function draw()
 			draw_sprite(canvas, value.bmp, value.x, value.y);
 		});
 		asteroids.forEach(function (value){
-			draw_sprite(canvas, value.bmp, value.x, value.y);
+			scaled_sprite(canvas, value.bmp, value.x, value.y, value.scale, value.scale);
 		});
 		rotate_sprite(canvas,ship.enginesOn?ship.bmpEng:ship.bmp,ship.x,ship.y,DEG(Math.atan2(mouse_y-ship.y,mouse_x-ship.x)));
 	} else {
-		textout_centre(canvas,font,"GAME OVER",SCREEN_W/2,SCREEN_H/2,24,makecol(0,0,0));
+		textout_centre(canvas,font,"GAME OVER",SCREEN_W/2,SCREEN_H/2,24,makecol(255,255,255));
+		textout_centre(canvas,font,"press SPACE to restart",SCREEN_W/2,SCREEN_H/2+50,14,makecol(255,255,255));
 	} 
 }
 
 function update()
-{		
+{	
+	if(!gameOver){
+	
+
 		if(ship.enginesOn){
 			ship.v = (ship.v <= 2 )?(ship.v + 0.02):(2);
 		}else{
@@ -49,6 +53,19 @@ function update()
 			asteroids.forEach(function (asteroid){
 				if(distance(value.x, value.y, asteroid.x, asteroid.y) < 12){
 					bullets.delete(value);
+					if(asteroid.scale > 0.25){
+						for(var i = 0; i<rand()%5; i++){
+							log('add new');
+							asteroids.add({
+								bmp: asteroidBmp,
+								x: asteroid.x+rand()%5 - 10,
+								y: asteroid.y+rand()%5 - 10, 
+								vx: rand()%6 - 3,
+								vy: rand()%6 - 3,
+								scale: asteroid.scale - 0.25
+							});
+						}
+					} 
 					asteroids.delete(asteroid);
 				}
 			});
@@ -72,10 +89,12 @@ function update()
 			
 			
 		});
+	}
 }
 
 function controls ()
 {
+	if(!gameOver){
 		if(pressed[KEY_SPACE]){
 			ship.enginesOn = true;
 		}
@@ -94,25 +113,34 @@ function controls ()
 				vy: 10*((mouse_y-ship.y)/d)
 			});
 		} 
+	}else{
+		if(pressed[KEY_SPACE]){
+			load_elements();
+			gameOver = false;
+		}
+	}
 }
 
 function events()
 {
-	if(Math.random() >= 0.99){
-		asteroids.add({
-			bmp: asteroidBmp,
-			x: rand()%width,
-			y: rand()%height,
-			vx: rand()%6 - 3,
-			vy: rand()%6 - 3
+	if(!gameOver) {
+		if(Math.random() >= 0.99){
+			asteroids.add({
+				bmp: asteroidBmp,
+				x: rand()%width,
+				y: rand()%height,
+				vx: rand()%6 - 3,
+				vy: rand()%6 - 3,
+				scale: 1.0
+			});
+		}
+		
+		asteroids.forEach(function (asteroid){
+			if(distance(ship.x, ship.y, asteroid.x, asteroid.y) < 15){
+				gameOver = true;
+			}
 		});
 	}
-	
-	asteroids.forEach(function (asteroid){
-		if(distance(ship.x, ship.y, asteroid.x, asteroid.y) < 15){
-			gameOver = true;
-		}
-	});
 	
 }
 
@@ -133,7 +161,7 @@ function main()
 	
 	ready(function(){
         loop(function(){
-            clear_to_color(canvas,makecol(255,255,255));
+            clear_to_color(canvas,makecol(0,0,0));
 			dispose();
 			controls();
             update();
