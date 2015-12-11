@@ -10,6 +10,8 @@ var asteroidBmp;
 
 var gameOver = false;
 
+var score = 0;
+
 function draw()
 {    
 	if(!gameOver){
@@ -21,6 +23,7 @@ function draw()
 			scaled_sprite(canvas, value.bmp, value.x, value.y, value.scale, value.scale);
 		});
 		rotate_sprite(canvas,ship.enginesOn?ship.bmpEng:ship.bmp,ship.x,ship.y,DEG(Math.atan2(mouse_y-ship.y,mouse_x-ship.x)));
+		textout_centre(canvas,font,"SCORE: "+score,SCREEN_W/2,15,14,makecol(255,255,255));
 	} else {
 		textout_centre(canvas,font,"GAME OVER",SCREEN_W/2,SCREEN_H/2,24,makecol(255,255,255));
 		textout_centre(canvas,font,"press SPACE to restart",SCREEN_W/2,SCREEN_H/2+50,14,makecol(255,255,255));
@@ -47,16 +50,18 @@ function update()
 			ship.v = 0;
 		}
 		   
+		var asteroidsToAdd = new Set();
+		   
 		bullets.forEach(function (value){
 			value.x += value.vx;
 			value.y += value.vy;
 			asteroids.forEach(function (asteroid){
 				if(distance(value.x, value.y, asteroid.x, asteroid.y) < 12){
+					score += 100;
 					bullets.delete(value);
 					if(asteroid.scale > 0.25){
 						for(var i = 0; i<rand()%5; i++){
-							log('add new');
-							asteroids.add({
+							asteroidsToAdd.add({
 								bmp: asteroidBmp,
 								x: asteroid.x+rand()%5 - 10,
 								y: asteroid.y+rand()%5 - 10, 
@@ -69,6 +74,10 @@ function update()
 					asteroids.delete(asteroid);
 				}
 			});
+		});
+		
+		asteroidsToAdd.forEach(function(value){ 
+			asteroids.add(value) 
 		});
 		
 		asteroids.forEach(function (asteroid) {
@@ -116,6 +125,7 @@ function controls ()
 	}else{
 		if(pressed[KEY_SPACE]){
 			load_elements();
+			score = 0;
 			gameOver = false;
 		}
 	}
