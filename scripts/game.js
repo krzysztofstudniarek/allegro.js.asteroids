@@ -12,6 +12,8 @@ var gameOver = false;
 var gameStarted = false;
 
 var score = 0;
+var enginesSound;
+var laserSound;
 
 function draw()
 {   
@@ -116,9 +118,11 @@ function controls ()
 {
 	if(!gameOver && gameStarted){
 		if(pressed[KEY_SPACE]){
+			play_sample(enginesSound);
 			ship.enginesOn = true;
 		}
 		if(released[KEY_SPACE]){
+			stop_sample(enginesSound);
 			ship.enginesOn = false;
 		}
 		
@@ -132,6 +136,7 @@ function controls ()
 				vx: 10*((mouse_x-ship.x)/d),
 				vy: 10*((mouse_y-ship.y)/d)
 			});
+			play_sample(laserSound);
 		} 
 	}else{
 		if(pressed[KEY_SPACE] && gameStarted){
@@ -160,6 +165,7 @@ function events()
 		
 		asteroids.forEach(function (asteroid){
 			if(distance(ship.x, ship.y, asteroid.x, asteroid.y) < 15){
+				stop_sample(enginesSound);
 				gameOver = true;
 			}
 		});
@@ -205,4 +211,9 @@ function load_elements()
 	
 	bullets = new Set();
 	asteroids = new Set();
+	
+	enginesSound = load_sample("sounds/engines.wav");
+	laserSound = load_sample("sounds/laser.wav");
+	
+	set_volume(0.5);
 }
